@@ -4,7 +4,7 @@ import numpy as np
 
 
 team_id='3833351'
-current_week = str(7)
+current_week = str(8)
 
 url = "https://fantasy.premierleague.com/api/entry/"+team_id+"/event/"+current_week+"/picks/"
 r = requests.get(url)
