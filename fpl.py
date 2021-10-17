@@ -4,7 +4,7 @@ import numpy as np
 import sys
 
 team_id='3833351'
-current_week = str(8)
+current_week = str(4)
 length = 0
 
 players_in_squad_data = []
@@ -80,18 +80,23 @@ def top_5_points():
   print("="*5+" Top 5 in GW"+current_week+" "+"="*5)
   sorted1 = sorted(all_players_points, key=lambda item: (all_players_points[str(item)]))
   for i in range(-1, -11, -1):
-    print("Rank "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
+    if i > -10:
+      print("Rank  "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
+    else:
+      print("Rank "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
+
 
 
 def main():
-    get_players_in_squad()
-    get_players_in_squad_names()
-    get_current_week_points()
-    top_5_points()
+  #load components in
+  get_players_in_squad()
+  get_players_in_squad_names()
+  get_current_week_points()
+  top_5_points()
 
-    print("="*5+" GAMEWEEK "+current_week+" ("+team_id+") "+"="*5)
-    for i in range(len(id_store_1)):
-      print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
+  print("="*5+" GW"+current_week+" ("+team_id+") "+"="*5)
+  for i in range(len(id_store_1)):
+    print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
 
 if __name__ == "__main__":
     sys.exit(main())
