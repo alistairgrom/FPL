@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 import sys
 
-team_id='3833351'
-current_week = str(4)
+team_id_var='3833351'
+current_week = str(6)
 length = 0
 
 players_in_squad_data = []
@@ -20,7 +20,7 @@ new_points = {}
 all_players_names = {}
 all_players_points = {}
 
-def get_players_in_squad():
+def get_players_in_squad(team_id):
   url = "https://fantasy.premierleague.com/api/entry/"+team_id+"/event/"+current_week+"/picks/"
   r = requests.get(url)
   json = r.json()
@@ -69,7 +69,7 @@ def get_current_week_points():
 
 id_store_2 = []
 
-url_live = "https://fantasy.premierleague.com/api/event/"+current_week+"/live/"
+url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
 r_live = requests.get(url_live)
 json_live = r_live.json()
 json_live.keys()
@@ -86,10 +86,55 @@ def top_5_points():
       print("Rank "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
 
 
+def get_league_roundup():
+  players_in_league = {}
+
+  url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
+  r_live = requests.get(url_live)
+  json_live = r_live.json()
+  json_live.keys()
+  for i in range(10):
+    try:
+      league_id_resp = json_live['leagues']['classic'][i]['id']
+      if league_id_resp > 500:
+        league_id = league_id_resp
+    except IndexError:
+      pass
+
+  league_url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
+  r_league = requests.get(league_url)
+  json_league = r_league.json()
+
+  for i in range(30):
+    try:
+      players_in_league[str(json_league['standings']['results'][i]['entry'])] = [json_league['standings']['results'][i]['event_total'], 
+                                                                                 json_league['standings']['results'][i]['player_name'], 
+                                                                                 json_league['standings']['results'][i]['entry_name']]
+    except IndexError:
+      pass
+
+  last_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[0]
+  first_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[-1]
+
+  print(players_in_league[str(last_place_id)][1]+"'s team "+
+        players_in_league[str(last_place_id)][2]+" has finished last with a poor "+
+        str(players_in_league[str(last_place_id)][0])+" points.")
+
+  if players_in_league[str(first_place_id)][1][-1] == 's' or 'S':
+    print(players_in_league[str(first_place_id)][1]+"' team "+
+          players_in_league[str(first_place_id)][2]+" has finished first with "+
+          str(players_in_league[str(first_place_id)][0])+" points.")
+  else:    
+    print(players_in_league[str(first_place_id)][1]+"'s team "+
+          players_in_league[str(first_place_id)][2]+" has finished first with "+
+          str(players_in_league[str(first_place_id)][0])+" points.")
+
+
 
 def main():
   #load components in
-  get_players_in_squad()
+  team_id = '3833351'
+  get_players_in_squad(team_id)
   get_players_in_squad_names()
   get_current_week_points()
   top_5_points()
@@ -97,6 +142,10 @@ def main():
   print("="*5+" GW"+current_week+" ("+team_id+") "+"="*5)
   for i in range(len(id_store_1)):
     print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
+  print('='*25)
+  get_league_roundup()
+
+  
 
 if __name__ == "__main__":
     sys.exit(main())
