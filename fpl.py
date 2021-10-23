@@ -20,6 +20,83 @@ new_points = {}
 all_players_names = {}
 all_players_points = {}
 
+
+player_data = {}
+
+def get_live_points(team_id, current_week):
+  all_players_data = {}
+  players_in_squad_data = []
+  url = "https://fantasy.premierleague.com/api/entry/"+str(team_id)+"/event/"+str(current_week)+"/picks/"
+  r = requests.get(url)
+  json = r.json()
+  json.keys()
+  return json['entry_history']['points']
+
+def team_ids_from_league(league_id):
+  url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
+  r = requests.get(url)
+  json = r.json()
+  players_in_league = []
+  for i in range(30):
+    try:
+      players_in_league.append(json['standings']['results'][i]['entry'])
+    except:
+      pass
+  return players_in_league
+
+def get_players_league_data(league_id, current_week):
+  url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
+  r = requests.get(url)
+  json = r.json()
+  players_in_league = []
+  for i in range(30):
+    try:
+      players_in_league.append(json['standings']['results'][i]['entry'])
+      player_data[str(json['standings']['results'][i]['entry'])] = get_live_points(str(json['standings']['results'][i]['entry']), current_week), str(json['standings']['results'][i]['player_name']), json['standings']['results'][i]['total'] 
+    except:
+      pass
+
+  print('{:22s} {:2s}{:4s} {:12s}'.format("Name", "GW", current_week, "Total Points"))
+  print("------------------------------------------")
+  for x in players_in_league:
+    try:
+      print('{:17s} {:8d} {:10d}'.format(player_data[str(x)][1], player_data[str(x)][0], player_data[str(x)][2]))
+    except:
+      print(x," joined the league after this GW.")
+  print("------------------------------------------")
+
+  # for j in players_in_league:
+  #   get_live_points(j, 9)
+
+
+
+  # for i in range(14):
+  #   player_id = json['picks'][i]['element']
+  #   player_position = json['picks'][i]['position']
+  #   players_in_squad_data.append(player_id)
+  
+  # url_bs = "https://fantasy.premierleague.com/api/bootstrap-static/"
+  # r_bs = requests.get(url_bs)
+  # json_bs = r_bs.json()
+  # json_bs.keys()
+  # for j in range(612):
+  #   elements_id = json_bs['elements'][j]['id']
+  #   elements_name = json_bs['elements'][j]['web_name']
+  #   elements_points = json_bs['elements'][j]['event_points']
+  
+
+  #   #all players are in this matched with their id
+  #   all_players_data[str(elements_id)] = [elements_name, elements_points]
+
+  #   if elements_id in players_in_squad_data:
+  #     players_in_squad_names.append(elements_name)
+  #     id_store_1.append(elements_id)
+  #     players_data[str(elements_id)] = [elements_name, elements_points]
+
+
+  
+
+
 def get_players_in_squad(team_id):
   url = "https://fantasy.premierleague.com/api/entry/"+team_id+"/event/"+current_week+"/picks/"
   r = requests.get(url)
@@ -133,19 +210,26 @@ def get_league_roundup():
 def main():
   #load components in
   team_id = '3833351'
-  get_players_in_squad(team_id)
-  get_players_in_squad_names()
-  get_current_week_points()
-  top_5_points()
+  current_week = '9'
+  league_id = '619202'
 
-  print("="*5+" GW"+current_week+" ("+team_id+") "+"="*5)
-  for i in range(len(id_store_1)):
-    print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
-  print('='*25)
+  # get_players_in_squad(team_id)
+  # get_players_in_squad_names()
+  # get_current_week_points()
+  # top_5_points()
 
-  get_league_roundup()
+  # print("="*5+" GW"+current_week+" ("+team_id+") "+"="*5)
+  # for i in range(len(id_store_1)):
+  #   print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
+  # print('='*25)
 
-  
+  # get_league_roundup()
+
+  #get_live_points(team_id, current_week)
+  get_players_league_data(league_id, current_week)
+
+  last_place_id = sorted(player_data, key=lambda item:(player_data[str(item)][0]))[0]
+  print(player_data[str(last_place_id)][1]+" "+str(get_live_points(last_place_id, current_week)))
 
 if __name__ == "__main__":
     sys.exit(main())
