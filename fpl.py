@@ -4,12 +4,12 @@ import numpy as np
 import sys
 
 team_id_var='3833351'
-current_week = str(6)
+current_week = str(9)
 length = 0
 
 players_in_squad_data = []
 players_in_squad_names = []
-players_in_squad__gw_points = []
+players_in_squad_gw_points = []
 id_store_1 = []
 id_store_2 = []
 
@@ -56,6 +56,7 @@ def get_current_week_points():
   json_live = r_live.json()
   json_live.keys()
   length = len(json_live['elements'])
+
   for k in range(length):
     id_live = json_live['elements'][k]['id']
     points_live = json_live['elements'][k]['stats']['total_points']
@@ -63,11 +64,11 @@ def get_current_week_points():
     #this matches the id to the players points
     all_players_points[str(id_live)] = points_live
     if id_live in players_in_squad_data:
-      players_in_squad__gw_points.append(str(json_live['elements'][k]['stats']['total_points']))
+      players_in_squad_gw_points.append(str(json_live['elements'][k]['stats']['total_points']))
       new_points[str(id_live)] = points_live
 
 
-id_store_2 = []
+
 
 url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
 r_live = requests.get(url_live)
@@ -84,6 +85,7 @@ def top_5_points():
       print("Rank  "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
     else:
       print("Rank "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
+
 
 
 def get_league_roundup():
@@ -116,18 +118,15 @@ def get_league_roundup():
   last_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[0]
   first_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[-1]
 
+
+
   print(players_in_league[str(last_place_id)][1]+"'s team "+
         players_in_league[str(last_place_id)][2]+" has finished last with a poor "+
         str(players_in_league[str(last_place_id)][0])+" points.")
 
-  if players_in_league[str(first_place_id)][1][-1] == 's' or 'S':
-    print(players_in_league[str(first_place_id)][1]+"' team "+
-          players_in_league[str(first_place_id)][2]+" has finished first with "+
-          str(players_in_league[str(first_place_id)][0])+" points.")
-  else:    
-    print(players_in_league[str(first_place_id)][1]+"'s team "+
-          players_in_league[str(first_place_id)][2]+" has finished first with "+
-          str(players_in_league[str(first_place_id)][0])+" points.")
+  print(players_in_league[str(first_place_id)][1]+"'s team "+
+        players_in_league[str(first_place_id)][2]+" has finished first with "+
+        str(players_in_league[str(first_place_id)][0])+" points.")
 
 
 
@@ -143,6 +142,7 @@ def main():
   for i in range(len(id_store_1)):
     print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
   print('='*25)
+
   get_league_roundup()
 
   
