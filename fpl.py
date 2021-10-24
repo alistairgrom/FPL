@@ -32,17 +32,17 @@ def get_live_points(team_id, current_week):
   json.keys()
   return json['entry_history']['points']
 
-def team_ids_from_league(league_id):
-  url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
-  r = requests.get(url)
-  json = r.json()
-  players_in_league = []
-  for i in range(30):
-    try:
-      players_in_league.append(json['standings']['results'][i]['entry'])
-    except:
-      pass
-  return players_in_league
+# def team_ids_from_league(league_id):
+#   url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
+#   r = requests.get(url)
+#   json = r.json()
+#   players_in_league = []
+#   for i in range(30):
+#     try:
+#       players_in_league.append(json['standings']['results'][i]['entry'])
+#     except:
+#       pass
+#   return players_in_league
 
 def get_players_league_data(league_id, current_week):
   url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
@@ -95,9 +95,10 @@ def get_players_league_data(league_id, current_week):
 
 
   
+#OLD CODE, WILL DELETE ONCE CHANGES ARE MADE
 
-
-def get_players_in_squad(team_id):
+def get_players_in_squad_ids(team_id, current_week):
+  players_ids = []
   url = "https://fantasy.premierleague.com/api/entry/"+team_id+"/event/"+current_week+"/picks/"
   r = requests.get(url)
   json = r.json()
@@ -105,7 +106,9 @@ def get_players_in_squad(team_id):
 
   for i in range(14):
     t = json['picks'][i]['element']
-    players_in_squad_data.append(t)
+    players_ids.append(t)
+
+  return players_ids
   
 #also populates the names for the top5 scorers of the current GW
 def get_players_in_squad_names():
@@ -147,10 +150,10 @@ def get_current_week_points():
 
 
 
-url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
-r_live = requests.get(url_live)
-json_live = r_live.json()
-json_live.keys()
+# url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
+# r_live = requests.get(url_live)
+# json_live = r_live.json()
+# json_live.keys()
 # for i in range(len(json_live['elements'])):
 #   print(json_live['elements'][i]['stats']['total_points'])
 
@@ -205,7 +208,7 @@ def get_league_roundup():
         players_in_league[str(first_place_id)][2]+" has finished first with "+
         str(players_in_league[str(first_place_id)][0])+" points.")
 
-
+#######################################
 
 def main():
   #load components in
@@ -213,23 +216,12 @@ def main():
   current_week = '9'
   league_id = '619202'
 
-  # get_players_in_squad(team_id)
-  # get_players_in_squad_names()
-  # get_current_week_points()
-  # top_5_points()
-
-  # print("="*5+" GW"+current_week+" ("+team_id+") "+"="*5)
-  # for i in range(len(id_store_1)):
-  #   print(new_name[str(id_store_1[i])]+", "+str(new_points[str(id_store_1[i])]))
-  # print('='*25)
-
-  # get_league_roundup()
-
-  #get_live_points(team_id, current_week)
   get_players_league_data(league_id, current_week)
 
   last_place_id = sorted(player_data, key=lambda item:(player_data[str(item)][0]))[0]
   print(player_data[str(last_place_id)][1]+" "+str(get_live_points(last_place_id, current_week)))
+
+  print(get_players_in_squad_ids(team_id, current_week))
 
 if __name__ == "__main__":
     sys.exit(main())
