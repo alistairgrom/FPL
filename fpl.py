@@ -104,48 +104,83 @@ def get_players_in_squad_ids(team_id, current_week):
   json = r.json()
   json.keys()
 
-  for i in range(14):
+  for i in range(15):
     t = json['picks'][i]['element']
     players_ids.append(t)
 
   return players_ids
-  
-#also populates the names for the top5 scorers of the current GW
-def get_players_in_squad_names():
+
+def get_squad_data(player_ids, current_week):
+  squad_player_name = {}
+  squad_player_live_points = {}
+  squad_data = {}
+
   url = "https://fantasy.premierleague.com/api/bootstrap-static/"
   r = requests.get(url)
   json = r.json()
   json.keys()
-  for j in range(612):
+  num_players = len(json['elements'])
+  for j in range(num_players):
     elements_id = json['elements'][j]['id']
     elements_name = json['elements'][j]['web_name']
-    elements_points = json['elements'][j]['event_points']
 
-    #all players are in this matched with their id
-    all_players_names[str(elements_id)] = elements_name
+    if elements_id in player_ids:
+      squad_player_name[str(elements_id)] = elements_name
+  
 
-    if elements_id in players_in_squad_data:
-      players_in_squad_names.append(elements_name)
-      id_store_1.append(elements_id)
-      new_name[str(elements_id)] = elements_name
+  live_url = "https://fantasy.premierleague.com/api/event/"+str(current_week)+"/live/"
+  live_r = requests.get(live_url)
+  live_json = live_r.json()
+  num_players = len(live_json['elements'])
+  for k in range(num_players):
+    live_elements_id = live_json['elements'][k]['id']
+    live_elements_points = live_json['elements'][k]['stats']['total_points']
 
-#also populates the all_players for the top5 scorers of the GW
-def get_current_week_points():
-  url_live = "https://fantasy.premierleague.com/api/event/"+current_week+"/live/"
-  r_live = requests.get(url_live)
-  json_live = r_live.json()
-  json_live.keys()
-  length = len(json_live['elements'])
+    if live_elements_id in player_ids:
+      squad_player_live_points[str(live_elements_id)] = live_elements_points
 
-  for k in range(length):
-    id_live = json_live['elements'][k]['id']
-    points_live = json_live['elements'][k]['stats']['total_points']
+  for x in player_ids:
+    squad_data[str(x)] = squad_player_name[str(x)], squad_player_live_points[str(x)]  
+  return squad_data
 
-    #this matches the id to the players points
-    all_players_points[str(id_live)] = points_live
-    if id_live in players_in_squad_data:
-      players_in_squad_gw_points.append(str(json_live['elements'][k]['stats']['total_points']))
-      new_points[str(id_live)] = points_live
+
+
+#also populates the names for the top5 scorers of the current GW
+# def get_players_in_squad_names():
+#   url = "https://fantasy.premierleague.com/api/bootstrap-static/"
+#   r = requests.get(url)
+#   json = r.json()
+#   json.keys()
+#   for j in range(612):
+#     elements_id = json['elements'][j]['id']
+#     elements_name = json['elements'][j]['web_name']
+#     elements_points = json['elements'][j]['event_points']
+
+#     #all players are in this matched with their id
+#     all_players_names[str(elements_id)] = elements_name
+
+#     if elements_id in players_in_squad_data:
+#       players_in_squad_names.append(elements_name)
+#       id_store_1.append(elements_id)
+#       new_name[str(elements_id)] = elements_name
+
+# #also populates the all_players for the top5 scorers of the GW
+# def get_current_week_points():
+#   url_live = "https://fantasy.premierleague.com/api/event/"+current_week+"/live/"
+#   r_live = requests.get(url_live)
+#   json_live = r_live.json()
+#   json_live.keys()
+#   length = len(json_live['elements'])
+
+#   for k in range(length):
+#     id_live = json_live['elements'][k]['id']
+#     points_live = json_live['elements'][k]['stats']['total_points']
+
+#     #this matches the id to the players points
+#     all_players_points[str(id_live)] = points_live
+#     if id_live in players_in_squad_data:
+#       players_in_squad_gw_points.append(str(json_live['elements'][k]['stats']['total_points']))
+#       new_points[str(id_live)] = points_live
 
 
 
@@ -157,56 +192,56 @@ def get_current_week_points():
 # for i in range(len(json_live['elements'])):
 #   print(json_live['elements'][i]['stats']['total_points'])
 
-def top_5_points():
-  print("="*5+" Top 5 in GW"+current_week+" "+"="*5)
-  sorted1 = sorted(all_players_points, key=lambda item: (all_players_points[str(item)]))
-  for i in range(-1, -11, -1):
-    if i > -10:
-      print("Rank  "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
-    else:
-      print("Rank "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
+# def top_5_points():
+#   print("="*5+" Top 5 in GW"+current_week+" "+"="*5)
+#   sorted1 = sorted(all_players_points, key=lambda item: (all_players_points[str(item)]))
+#   for i in range(-1, -11, -1):
+#     if i > -10:
+#       print("Rank  "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
+#     else:
+#       print("Rank "+str(i*-1)+": "+all_players_names[str(sorted1[i])]+", "+str(all_players_points[str(sorted1[i])]))
 
 
 
-def get_league_roundup():
-  players_in_league = {}
+# def get_league_roundup():
+#   players_in_league = {}
 
-  url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
-  r_live = requests.get(url_live)
-  json_live = r_live.json()
-  json_live.keys()
-  for i in range(10):
-    try:
-      league_id_resp = json_live['leagues']['classic'][i]['id']
-      if league_id_resp > 500:
-        league_id = league_id_resp
-    except IndexError:
-      pass
+#   url_live = "https://fantasy.premierleague.com/api/entry/"+"3833351/"
+#   r_live = requests.get(url_live)
+#   json_live = r_live.json()
+#   json_live.keys()
+#   for i in range(10):
+#     try:
+#       league_id_resp = json_live['leagues']['classic'][i]['id']
+#       if league_id_resp > 500:
+#         league_id = league_id_resp
+#     except IndexError:
+#       pass
 
-  league_url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
-  r_league = requests.get(league_url)
-  json_league = r_league.json()
+#   league_url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
+#   r_league = requests.get(league_url)
+#   json_league = r_league.json()
 
-  for i in range(30):
-    try:
-      players_in_league[str(json_league['standings']['results'][i]['entry'])] = [json_league['standings']['results'][i]['event_total'], 
-                                                                                 json_league['standings']['results'][i]['player_name'], 
-                                                                                 json_league['standings']['results'][i]['entry_name']]
-    except IndexError:
-      pass
+#   for i in range(30):
+#     try:
+#       players_in_league[str(json_league['standings']['results'][i]['entry'])] = [json_league['standings']['results'][i]['event_total'], 
+#                                                                                  json_league['standings']['results'][i]['player_name'], 
+#                                                                                  json_league['standings']['results'][i]['entry_name']]
+#     except IndexError:
+#       pass
 
-  last_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[0]
-  first_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[-1]
+#   last_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[0]
+#   first_place_id = sorted(players_in_league, key=lambda item:(players_in_league[str(item)][0]))[-1]
 
 
 
-  print(players_in_league[str(last_place_id)][1]+"'s team "+
-        players_in_league[str(last_place_id)][2]+" has finished last with a poor "+
-        str(players_in_league[str(last_place_id)][0])+" points.")
+#   print(players_in_league[str(last_place_id)][1]+"'s team "+
+#         players_in_league[str(last_place_id)][2]+" has finished last with a poor "+
+#         str(players_in_league[str(last_place_id)][0])+" points.")
 
-  print(players_in_league[str(first_place_id)][1]+"'s team "+
-        players_in_league[str(first_place_id)][2]+" has finished first with "+
-        str(players_in_league[str(first_place_id)][0])+" points.")
+#   print(players_in_league[str(first_place_id)][1]+"'s team "+
+#         players_in_league[str(first_place_id)][2]+" has finished first with "+
+#         str(players_in_league[str(first_place_id)][0])+" points.")
 
 #######################################
 
@@ -221,7 +256,8 @@ def main():
   last_place_id = sorted(player_data, key=lambda item:(player_data[str(item)][0]))[0]
   print(player_data[str(last_place_id)][1]+" "+str(get_live_points(last_place_id, current_week)))
 
-  print(get_players_in_squad_ids(team_id, current_week))
+
+  print(get_squad_data(get_players_in_squad_ids(team_id, current_week), current_week))
 
 if __name__ == "__main__":
     sys.exit(main())
