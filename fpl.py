@@ -22,6 +22,7 @@ all_players_points = {}
 
 
 player_data = {}
+captain = {}
 
 def get_live_points(team_id, current_week):
   all_players_data = {}
@@ -29,20 +30,8 @@ def get_live_points(team_id, current_week):
   url = "https://fantasy.premierleague.com/api/entry/"+str(team_id)+"/event/"+str(current_week)+"/picks/"
   r = requests.get(url)
   json = r.json()
-  json.keys()
   return json['entry_history']['points']
 
-# def team_ids_from_league(league_id):
-#   url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
-#   r = requests.get(url)
-#   json = r.json()
-#   players_in_league = []
-#   for i in range(30):
-#     try:
-#       players_in_league.append(json['standings']['results'][i]['entry'])
-#     except:
-#       pass
-#   return players_in_league
 
 def get_players_league_data(league_id, current_week):
   url = 'https://fantasy.premierleague.com/api/leagues-classic/'+str(league_id)+'/standings/?page_new_entries=1&page_standings=1&phase=1'
@@ -79,7 +68,7 @@ def get_players_in_squad_ids(team_id, current_week):
 
   return players_ids
 
-def get_squad_data(player_ids, current_week):
+def get_squad_data(player_ids, current_week, team_id):
   squad_player_name = {}
   squad_player_live_points = {}
   squad_data = {}
@@ -108,24 +97,51 @@ def get_squad_data(player_ids, current_week):
     if live_elements_id in player_ids:
       squad_player_live_points[str(live_elements_id)] = live_elements_points
 
+
+  picks_url = "https://fantasy.premierleague.com/api/entry/"+str(team_id)+"/event/"+str(current_week)+"/picks/"
+  picks_r = requests.get(picks_url)
+  picks_json = picks_r.json()
+
+  for j in range(len(picks_json['picks'])):
+    captain[str(picks_json['picks'][j]['element'])] = picks_json['picks'][j]['is_captain']
+
   for x in player_ids:
-    squad_data[str(x)] = squad_player_name[str(x)], squad_player_live_points[str(x)]  
+    squad_data[str(x)] = squad_player_name[str(x)], squad_player_live_points[str(x)], captain[str(x)]
   return squad_data
 
+def get_total_points(squad_data, ids):
+  sum = 0
+  for x in ids[:12]:
+    if squad_data[str(x)][2] == True:
+      sum += 2*(squad_data[str(x)][1])
+    else:
+      sum += squad_data[str(x)][1]
+  return sum
 
 def main():
   #load components in
   team_id = '3833351'
-  current_week = '9'
+  current_week = '8'
   league_id = '619202'
 
   get_players_league_data(league_id, current_week)
 
   last_place_id = sorted(player_data, key=lambda item:(player_data[str(item)][0]))[0]
-  print(player_data[str(last_place_id)][1]+" "+str(get_live_points(last_place_id, current_week)))
+  print("GW"+current_week+"'s biggest loser is "+
+    player_data[str(last_place_id)][1]+" with "+str(get_live_points(last_place_id, current_week)))
 
+  print("------------------------------------------")
 
-  print(get_squad_data(get_players_in_squad_ids(team_id, current_week), current_week))
+  ids = get_players_in_squad_ids(team_id, current_week)
+  squad_data = get_squad_data(ids, current_week, team_id)
+
+  for x in ids:
+    print(squad_data[str(x)])
+
+  print("------------------------------------------")
+
+  print(get_total_points(squad_data, ids))
+  
 
 if __name__ == "__main__":
     sys.exit(main())
