@@ -66,6 +66,8 @@ def get_players_in_squad_ids(team_id, current_week):
     t = json['picks'][i]['element']
     players_ids.append(t)
 
+  for j in range(len(json['picks'])):
+    captain[str(json['picks'][j]['element'])] = json['picks'][j]['is_captain']
   return players_ids
 
 def get_squad_data(player_ids, current_week, team_id):
@@ -97,14 +99,6 @@ def get_squad_data(player_ids, current_week, team_id):
     if live_elements_id in player_ids:
       squad_player_live_points[str(live_elements_id)] = live_elements_points
 
-
-  picks_url = "https://fantasy.premierleague.com/api/entry/"+str(team_id)+"/event/"+str(current_week)+"/picks/"
-  picks_r = requests.get(picks_url)
-  picks_json = picks_r.json()
-
-  for j in range(len(picks_json['picks'])):
-    captain[str(picks_json['picks'][j]['element'])] = picks_json['picks'][j]['is_captain']
-
   for x in player_ids:
     squad_data[str(x)] = squad_player_name[str(x)], squad_player_live_points[str(x)], captain[str(x)]
   return squad_data
@@ -121,7 +115,7 @@ def get_total_points(squad_data, ids):
 def main():
   #load components in
   team_id = '3833351'
-  current_week = '8'
+  current_week = '10'
   league_id = '619202'
 
   get_players_league_data(league_id, current_week)
