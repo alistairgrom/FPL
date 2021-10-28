@@ -3,22 +3,24 @@ import pandas as pd
 import numpy as np
 import sys
 
+from flask import Flask, render_template, request, redirect
+
 team_id_var='3833351'
 current_week = str(9)
 length = 0
 
-players_in_squad_data = []
-players_in_squad_names = []
-players_in_squad_gw_points = []
-id_store_1 = []
-id_store_2 = []
+# players_in_squad_data = []
+# players_in_squad_names = []
+# players_in_squad_gw_points = []
+# id_store_1 = []
+# id_store_2 = []
 
 
-new_name = {}
-new_points = {}
+# new_name = {}
+# new_points = {}
 
-all_players_names = {}
-all_players_points = {}
+# all_players_names = {}
+# all_players_points = {}
 
 
 player_data = {}
@@ -115,7 +117,7 @@ def get_total_points(squad_data, ids):
 def main():
   #load components in
   team_id = '3833351'
-  current_week = '10'
+  current_week = '9'
   league_id = '619202'
 
   get_players_league_data(league_id, current_week)
@@ -137,6 +139,18 @@ def main():
   print(get_total_points(squad_data, ids))
   
 
-if __name__ == "__main__":
-    sys.exit(main())
+# if __name__ == "__main__":
+#     sys.exit(main())
 
+
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return render_template('index.html')
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
