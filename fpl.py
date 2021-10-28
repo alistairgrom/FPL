@@ -25,6 +25,8 @@ length = 0
 
 player_data = {}
 captain = {}
+auto_sub_in = []
+auto_sub_out = []
 
 def get_live_points(team_id, current_week):
   all_players_data = {}
@@ -64,6 +66,14 @@ def get_players_in_squad_ids(team_id, current_week):
   json = r.json()
   json.keys()
 
+  for k in range(len(json['automatic_subs'])):
+    id = json['automatic_subs'][k]['element_out']
+    auto_sub_out.append(id)
+
+  for l in range(len(json['automatic_subs'])):
+    id = json['automatic_subs'][l]['element_in']
+    auto_sub_in.append(id)
+
   for i in range(15):
     t = json['picks'][i]['element']
     players_ids.append(t)
@@ -71,6 +81,7 @@ def get_players_in_squad_ids(team_id, current_week):
   for j in range(len(json['picks'])):
     captain[str(json['picks'][j]['element'])] = json['picks'][j]['is_captain']
   return players_ids
+
 
 def get_squad_data(player_ids, current_week, team_id):
   squad_player_name = {}
@@ -107,17 +118,25 @@ def get_squad_data(player_ids, current_week, team_id):
 
 def get_total_points(squad_data, ids):
   sum = 0
-  for x in ids[:12]:
+  for x in ids[:11]:
     if squad_data[str(x)][2] == True:
       sum += 2*(squad_data[str(x)][1])
     else:
       sum += squad_data[str(x)][1]
+
+  #print(sum)
+  # if len(auto_sub_in) != 0 and len(auto_sub_in) != 0:
+  #   for j in range(len(auto_sub_out)):
+  #     sum -= squad_data[str(auto_sub_out[j])][1]
+  #   for i in range(len(auto_sub_in)):
+  #     sum += squad_data[str(auto_sub_in[i])][1]
+  
   return sum
 
 def main():
   #load components in
-  team_id = '3833351'
-  current_week = '9'
+  team_id = '3378116'
+  current_week = '8'
   league_id = '619202'
 
   get_players_league_data(league_id, current_week)
@@ -138,10 +157,10 @@ def main():
 
   print(get_total_points(squad_data, ids))
   
+  print(str(auto_sub_in)+" "+str(auto_sub_out))
 
-# if __name__ == "__main__":
-#     sys.exit(main())
-
+if __name__ == "__main__":
+    sys.exit(main())
 
 
 app = Flask(__name__)
@@ -152,5 +171,5 @@ def index():
 
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# if __name__ == "__main__":
+#     app.run(debug=True)
